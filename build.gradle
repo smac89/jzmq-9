@@ -1,0 +1,72 @@
+plugins {
+    id 'org.kordamp.gradle.project' version '0.27.0' apply false
+}
+
+allprojects {
+    group 'org.zeromq'
+    version '3.1.1'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.kordamp.gradle.project'
+
+    sourceCompatibility = JavaVersion.VERSION_1_9
+    targetCompatibility = JavaVersion.VERSION_1_9
+
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    def moduleName = project.name
+
+    sourceSets {
+        main {
+            java {
+                srcDirs 'src/main/module'
+            }
+        }
+    }
+
+    afterEvaluate {
+        tasks.withType(Test) {
+            systemProperty 'java.library.path', '/tmp/jzmq/org.zeromq.jzmq.jni/bin/lib'
+        }
+
+        compileJava {
+            inputs.property('moduleName', moduleName)
+            doFirst {
+                options.compilerArgs = [
+                        '--module-path', classpath.asPath
+                ]
+                classpath = files()
+            }
+        }
+
+        test {
+            failFast true
+        }
+
+        jar {
+            inputs.property('moduleName', moduleName)
+            manifest {
+                attributes('Multi-Release': 'true')
+                attributes('Automatic-Module-Name': moduleName)
+            }
+        }
+
+        javadoc {
+            inputs.property('moduleName', moduleName)
+            doFirst {
+                options.addStringOption('-module-path', classpath.asPath)
+                classpath = files()
+            }
+        }
+    }
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = '5.6.2'
+}

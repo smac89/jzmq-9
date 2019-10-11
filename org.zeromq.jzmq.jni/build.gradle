@@ -1,0 +1,28 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    testImplementation 'org.powermock:powermock-easymock-release-full:1.6.4'
+    testImplementation 'org.easymock:easymock:3.4'
+    testImplementation 'javax.xml.bind:jaxb-api:2.2.11'
+}
+
+application {
+    mainClassName 'org.zeromq.App'
+}
+
+test {
+    doFirst {
+        jvmArgs '--illegal-access=warn'
+        jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+        jvmArgs '--add-opens', 'java.base/java.io=ALL-UNNAMED'
+        jvmArgs '--add-opens', 'java.base/java.net=ALL-UNNAMED'
+        jvmArgs '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+        failFast true
+    }
+}
+
+config {
+
+}

@@ -1,0 +1,16 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'org.kordamp.gradle:settings-gradle-plugin:0.27.0'
+    }
+}
+apply plugin: 'org.kordamp.gradle.settings'
+
+rootProject.name = 'zeromq-jzmq'
+
+projects {
+    layout = 'standard'
+    enforceNamingConvention = false
+}

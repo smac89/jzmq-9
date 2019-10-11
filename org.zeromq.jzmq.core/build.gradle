@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(':org.zeromq.jzmq.jni')
+    testImplementation 'junit:junit:4.12'
+}
+
