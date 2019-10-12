@@ -25,11 +25,11 @@ public class EmbeddedLibraryTools {
         if (osName.toLowerCase().contains("windows")) {
             osName = "Windows";
         } else if (osName.toLowerCase().contains("mac os x")) {
-            osName = "Mac OS X";
+            osName = "OsX";
         } else {
             osName = osName.replaceAll("\\s+", "_");
         }
-        return System.getProperty("os.arch") + "/" + osName;
+        return (System.getProperty("os.arch") + "/" + osName).toLowerCase();
     }
 
     public static Collection<String> getEmbeddedLibraryList() {

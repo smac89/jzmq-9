@@ -13,10 +13,10 @@ public class ZMQQueueTest {
 	public void testQueue() throws InterruptedException {
 		Context context = ZMQ.context(1);
 
-		ZMQ.Socket clients = context.socket(ZMQ.XREP);
+		ZMQ.Socket clients = context.socket(ZMQ.ROUTER);
 		clients.bind("inproc://gate_clients");
 
-		ZMQ.Socket workers = context.socket(ZMQ.XREQ);
+		ZMQ.Socket workers = context.socket(ZMQ.DEALER);
 		workers.bind("inproc://gate_workers");
 
 		ZMQ.Socket client = context.socket(ZMQ.REQ);

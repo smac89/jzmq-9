@@ -8,7 +8,7 @@ buildscript {
 }
 apply plugin: 'org.kordamp.gradle.settings'
 
-rootProject.name = 'zeromq-jzmq'
+rootProject.name = 'jzmq'
 
 projects {
     layout = 'standard'

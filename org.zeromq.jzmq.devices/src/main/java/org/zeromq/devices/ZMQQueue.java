@@ -31,7 +31,7 @@ public class ZMQQueue implements Runnable, Closeable {
         this.inSocket = inSocket;
         this.outSocket = outSocket;
 
-        this.poller = context.poller(2);
+        this.poller = new Poller(2);
         this.poller.register(inSocket, ZMQ.Poller.POLLIN);
         this.poller.register(outSocket, ZMQ.Poller.POLLIN);
     }

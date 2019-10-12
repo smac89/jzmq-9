@@ -76,7 +76,7 @@ public class ZLoopTest {
 
             @Override
             public int handle(ZLoop loop, PollItem item, Object arg) {
-                received = ((Socket) arg).recvStr(0);
+                received = ((Socket) arg).recvStr(0, ZMQ.CHARSET);
                 // Just end the reactor
                 return -1;
             }
@@ -126,7 +126,7 @@ public class ZLoopTest {
 
             @Override
             public int handle(ZLoop loop, PollItem item, Object arg) {
-                received = ((Socket) arg).recvStr(0);
+                received = ((Socket) arg).recvStr(0, ZMQ.CHARSET);
                 // Just end the reactor
                 return -1;
             }
@@ -174,7 +174,7 @@ public class ZLoopTest {
                     public int handle(ZLoop loop, PollItem item, Object arg) {
                         final long now2 = System.currentTimeMillis();
                         Assert.assertTrue(now2 >= now + 10);
-                        received = ((Socket) arg).recvStr(0);
+                        received = ((Socket) arg).recvStr(0, ZMQ.CHARSET);
                         // Just end the reactor
                         return -1;
                     }
@@ -223,7 +223,7 @@ public class ZLoopTest {
                 ZLoop.IZLoopHandler shutdownEvent = new ZLoop.IZLoopHandler() {
                     @Override
                     public int handle(ZLoop loop, PollItem item, Object arg) {
-                        received = ((Socket) arg).recvStr(0);
+                        received = ((Socket) arg).recvStr(0, ZMQ.CHARSET);
                         // Just end the reactor
                         return -1;
                     }

@@ -233,6 +233,8 @@ public class ZMQ {
             EVENT_LISTENING | EVENT_BIND_FAILED | EVENT_ACCEPTED | EVENT_ACCEPT_FAILED |
             EVENT_CLOSED | EVENT_CLOSE_FAILED | EVENT_DISCONNECTED | EVENT_MONITOR_STOPPED;
 
+    public static final Charset CHARSET = Charset.defaultCharset();
+
     /**
      * @return Major version number of the ZMQ library.
      */
@@ -1814,7 +1816,7 @@ public class ZMQ {
          */
         @Deprecated
         public String recvStr(int flags) {
-            return recvStr(flags, Charset.defaultCharset());
+            return recvStr(flags, CHARSET);
         }
 
         /**

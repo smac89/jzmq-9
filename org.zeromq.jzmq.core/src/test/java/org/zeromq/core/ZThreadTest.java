@@ -37,7 +37,7 @@ public class ZThreadTest {
             public void run(Object[] args, ZContext ctx, Socket pipe) {
                 // Create a socket to check it'll be automatically deleted
                 ctx.createSocket(ZMQ.PUSH);
-                pipe.recvStr();
+                pipe.recvStr(ZMQ.CHARSET);
                 pipe.send("pong");
             }
         };
@@ -46,7 +46,7 @@ public class ZThreadTest {
         assert (pipe != null);
 
         pipe.send("ping");
-        String pong = pipe.recvStr();
+        String pong = pipe.recvStr(ZMQ.CHARSET);
 
         Assert.assertEquals(pong, "pong");
 

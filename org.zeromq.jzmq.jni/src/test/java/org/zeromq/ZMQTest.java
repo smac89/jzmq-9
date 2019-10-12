@@ -244,9 +244,9 @@ public class ZMQTest {
         public void run() {
             s.connect("tcp://127.0.0.1:6660");
             s.send("hello", 0);
-            String msg = s.recvStr(0);
+            String msg = s.recvStr(ZMQ.CHARSET);
             s.send("world", 0);
-            msg = s.recvStr(0);
+            msg = s.recvStr(ZMQ.CHARSET);
 
             s.close();
         }
@@ -270,17 +270,17 @@ public class ZMQTest {
             s.connect("tcp://127.0.0.1:6661");
             int count = 0;
             while (count < 2) {
-                String msg = s.recvStr(0);
+                String msg = s.recvStr(0, ZMQ.CHARSET);
                 if (msg == null) {
                     throw new RuntimeException();
                 }
                 String identity = msg;
-                msg = s.recvStr(0);
+                msg = s.recvStr(0, ZMQ.CHARSET);
                 if (msg == null) {
                     throw new RuntimeException();
                 }
 
-                msg = s.recvStr(0);
+                msg = s.recvStr(ZMQ.CHARSET);
                 if (msg == null) {
                     throw new RuntimeException();
                 }
@@ -391,9 +391,9 @@ public class ZMQTest {
             socket.connect("tcp://localhost:12345");
             socket.send("test1", ZMQ.SNDMORE);
             socket.send("test2");
-            assertEquals("test1", reply.recvStr());
+            assertEquals("test1", reply.recvStr(ZMQ.CHARSET));
             assertTrue(reply.hasReceiveMore());
-            assertEquals("test2", reply.recvStr());
+            assertEquals("test2", reply.recvStr(ZMQ.CHARSET));
         } finally {
             try {
                 socket.close();

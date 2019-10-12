@@ -2,21 +2,102 @@ plugins {
     id 'org.kordamp.gradle.project' version '0.27.0' apply false
 }
 
+apply plugin: 'org.kordamp.gradle.bom'
+
 allprojects {
+    apply plugin: 'org.kordamp.gradle.project'
+
     group 'org.zeromq'
     version '3.1.1'
 }
 
+// POM reference: https://maven.apache.org/pom.html
+config {
+    release = true
+    info {
+        description = """The 0MQ lightweight messaging kernel is a library which extends
+            > the standard socket interfaces with features traditionally
+            > provided by specialised messaging middleware products. 0MQ sockets
+            > provide an abstraction of asynchronous message queues, multiple
+            > messaging patterns, message filtering (subscriptions), seamless
+            > access to multiple transport protocols and more.
+            >
+            > This package contains the Java Bindings for ZeroMQ.""".stripMargin(">")
+
+        inceptionYear = '2007'
+        tags = ['zmq', 'jzmq', 'zeromq', 'Ømq']
+        vendor = "zeromq"
+
+        links {
+            website = "https://zeromq.org"
+        }
+
+        scm {
+            url = "https://github.com/zeromq/jzmq"
+            connection = "scm:git:git://github.com/zeromq/jzmq.git"
+            developerConnection = "scm:git:ssh://git@github.com/zeromq/jzmq.git"
+        }
+
+        organization {
+            name = "zeromq"
+            url = "https://zeromq.org"
+        }
+
+        people {
+            person {
+                id = "zeromq"
+                name = "The ØMQ project"
+            }
+        }
+
+        issueManagement {
+            url = "https://github.com/zeromq/jzmq/issues"
+        }
+
+        ciManagement {
+            system = "Travis CI"
+            url = "https://travis-ci.org"
+        }
+
+        repositories {
+            repository {
+                name = 'mavenTmp'
+                url  = 'file:///tmp/repo/maven'
+            }
+        }
+    }
+
+    publishing {
+        releasesRepository  = 'mavenTmp'
+        snapshotsRepository = 'mavenTmp'
+    }
+
+    licensing {
+        licenses {
+            license {
+                primary = true
+                id = 'LGPL-3.0-or-later'
+                name = "LGPLv3+"
+            }
+        }
+    }
+}
+
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'org.kordamp.gradle.project'
 
     sourceCompatibility = JavaVersion.VERSION_1_9
     targetCompatibility = JavaVersion.VERSION_1_9
 
     repositories {
         mavenCentral()
-        jcenter()
+    }
+
+    config {
+        buildInfo {
+            skipBuildBy = true
+            skipBuildJdk = true
+        }
     }
 
     def moduleName = project.name
@@ -30,15 +111,19 @@ subprojects {
     }
 
     afterEvaluate {
-        tasks.withType(Test) {
-            systemProperty 'java.library.path', '/tmp/jzmq/org.zeromq.jzmq.jni/bin/lib'
+        tasks.withType(JavaCompile) {
+            doFirst {
+                options.compilerArgs += [
+                        '-Xlint:deprecation'
+                ]
+            }
         }
 
         compileJava {
             inputs.property('moduleName', moduleName)
             doFirst {
-                options.compilerArgs = [
-                        '--module-path', classpath.asPath
+                options.compilerArgs += [
+                        '--module-path', classpath.asPath,
                 ]
                 classpath = files()
             }
@@ -51,7 +136,7 @@ subprojects {
         jar {
             inputs.property('moduleName', moduleName)
             manifest {
-                attributes('Multi-Release': 'true')
+//                attributes('Multi-Release': 'true')
                 attributes('Automatic-Module-Name': moduleName)
             }
         }
@@ -59,9 +144,32 @@ subprojects {
         javadoc {
             inputs.property('moduleName', moduleName)
             doFirst {
+                // See https://github.com/java9-modularity/gradle-modules-plugin/issues/13#issuecomment-432397501
                 options.addStringOption('-module-path', classpath.asPath)
                 classpath = files()
             }
+        }
+
+        publishing {
+            publications {
+                "${project.name - ~/(\w+(?>\.))+/}"(MavenPublication) {
+                    from components.java
+                    artifact sourceJar
+                    artifact javadocJar
+                }
+            }
+
+            repositories {
+                maven {
+                    name = 'mavenTmp'
+                    url  = 'file:///tmp/repo/maven'
+                }
+            }
+        }
+
+        license {
+            // https://github.com/hierynomus/license-gradle-plugin#license-extension
+            ignoreFailures = true
         }
     }
 }

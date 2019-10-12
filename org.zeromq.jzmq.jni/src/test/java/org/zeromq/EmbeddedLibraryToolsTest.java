@@ -30,32 +30,32 @@ public class EmbeddedLibraryToolsTest {
     @Test
     public void rewriteWindowsXP() {
         setOsProperties("Windows XP", "x86");
-        assertPlatformIdentifierEquals("x86/Windows");
+        assertPlatformIdentifierEquals("x86/windows");
     }
 
     @Test
     public void rewriteWindows8() {
         // Windows 8 reported as 6.2 (http://bugs.java.com/view_bug.do?bug_id=7170169)
         setOsProperties("Windows 6.2", "x86");
-        assertPlatformIdentifierEquals("x86/Windows");
+        assertPlatformIdentifierEquals("x86/windows");
     }
 
     @Test
     public void rewriteMacOSX() {
         setOsProperties("mac os x", "x86_64");
-        assertPlatformIdentifierEquals("x86_64/Mac OS X");
+        assertPlatformIdentifierEquals("x86_64/osx");
     }
 
     @Test
     public void passThroughLinux32Bit() {
         setOsProperties("Linux", "amd64");
-        assertPlatformIdentifierEquals("amd64/Linux");
+        assertPlatformIdentifierEquals("amd64/linux");
     }
 
     @Test
     public void rewriteSpacesInPath() {
         setOsProperties("Digital Unix", "alpha");
-        assertPlatformIdentifierEquals("alpha/Digital_Unix");
+        assertPlatformIdentifierEquals("alpha/digital_unix");
     }
 
     @Test

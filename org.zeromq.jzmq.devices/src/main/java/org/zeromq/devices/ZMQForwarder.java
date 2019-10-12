@@ -28,7 +28,7 @@ public class ZMQForwarder implements Runnable {
         this.inSocket = inSocket;
         this.outSocket = outSocket;
 
-        this.poller = context.poller(1);
+        this.poller = new Poller(1);
         this.poller.register(inSocket, ZMQ.Poller.POLLIN);
     }
 
