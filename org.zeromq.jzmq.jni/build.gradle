@@ -22,8 +22,8 @@ task buildJzmqLib(type: Exec) {
         exec { executable './autogen.sh' }
         exec {
             executable './configure'
+            environment 'JAVA_HOME', System.properties.'java.home'
             args '--prefix', "$buildDir/bin"
-            args '--with-jdk', "${System.properties.'java.home'}"
         }
         exec { executable 'make' }
     }
