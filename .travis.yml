@@ -5,15 +5,15 @@ addons:
   apt:
     update: true
     sources:
-      - sourceline: 'deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_18.04/'
+      - sourceline: 'deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_18.04/ /'
         key_url: 'https://download.opensuse.org/repositories/network:messaging:zeromq:release-stable/xUbuntu_18.04/Release.key'
     packages:
       - build-essential
-      - libpgm-dev
       - make
       - pkg-config
-      - libtool
       - automake
+      - libtool
+# https://software.opensuse.org/download.html?project=network%3Amessaging%3Azeromq%3Arelease-stable&package=libzmq3-dev
       - libzmq3-dev
 
 matrix:
@@ -24,11 +24,8 @@ matrix:
     - jdk: openjdk9
     - jdk: openjdk11
 
-before_script:
-  - echo "JAVA_HOME=$JAVA_HOME"
-
 install:
- - echo 'https://github.com/travis-ci/travis-ci/issues/8667'
+  - echo 'https://github.com/travis-ci/travis-ci/issues/8667'
 
 script: ./gradlew test
 after_script: ./gradlew --no-daemon publishToMavenLocal

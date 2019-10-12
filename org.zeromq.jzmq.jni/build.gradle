@@ -23,6 +23,7 @@ task buildJzmqLib(type: Exec) {
         exec {
             executable './configure'
             args '--prefix', "$buildDir/bin"
+            args '--with-jdk', "${System.properties.'java.home'}"
         }
         exec { executable 'make' }
     }
