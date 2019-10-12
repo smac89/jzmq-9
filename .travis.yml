@@ -1,8 +1,5 @@
 language: java
 addons:
- # hostname monkeying needed for openjdk, see travis-ci/travis-ci#5227 for details
- hosts:
- - myshorthost
  apt:
   update: true
   packages:
@@ -12,7 +9,6 @@ addons:
    - pkg-config
    - libtool
    - automake
- hostname: myshorthost
 
 before_script:
  - git clone git://github.com/jedisct1/libsodium.git
