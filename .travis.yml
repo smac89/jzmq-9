@@ -1,36 +1,38 @@
 language: java
 addons:
- apt:
-  update: true
-  packages:
-   - build-essential
-   - libpgm-dev
-   - make
-   - pkg-config
-   - libtool
-   - automake
+  apt:
+    update: true
+    packages:
+      - build-essential
+      - libpgm-dev
+      - make
+      - pkg-config
+      - libtool
+      - automake
+
+matrix:
+  fast_finish: true
+  include:
+    - jdk: oraclejdk9
+    - jdk: oraclejdk11
+    - jdk: openjdk9
+    - jdk: openjdk11
 
 before_script:
- - git clone git://github.com/jedisct1/libsodium.git
- - cd libsodium
- - ./autogen.sh
- - ./configure && make
- - sudo make install
- - sudo ldconfig
- - cd ..
- - git clone https://github.com/zeromq/libzmq.git
- - cd libzmq
- - ./autogen.sh
- - ./configure --with-libsodium && make
- - sudo make install
- - sudo ldconfig
- - cd ..
+  - git clone git://github.com/jedisct1/libsodium.git
+  - cd libsodium
+  - ./autogen.sh
+  - ./configure && make
+  - sudo make install
+  - sudo ldconfig
+  - cd ..
+  - git clone https://github.com/zeromq/libzmq.git
+  - cd libzmq
+  - ./autogen.sh
+  - ./configure --with-libsodium && make
+  - sudo make install
+  - sudo ldconfig
+  - cd ..
 
 script: ./gradlew test
 after_script: ./gradlew --no-daemon publishToMavenLocal
-
-jdk:
- - oraclejdk9
- - oraclejdk11
- - openjdk9
- - openjdk11
