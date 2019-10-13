@@ -3,7 +3,7 @@ What is JZMQ?
 
 This is the Java language binding for libzmq (aka ZeroMQ, 0MQ).
 
-[![Build Status](https://travis-ci.org/zeromq/jzmq.png?branch=master)](https://travis-ci.org/zeromq/jzmq)
+[![Build Status](https://travis-ci.com/smac89/jzmq-9.svg?branch=master)](https://travis-ci.com/smac89/jzmq-9)
 
 The latest [javadocs](http://zeromq.github.com/jzmq/javadocs/).
 
@@ -13,23 +13,17 @@ Building and Installing JZMQ
 To build you need to have the libzmq library already installed, then you run:
 
 ```bash
-cd jzmq-jni/
+cd org.zeromq.jzmq.jni/
 ./autogen.sh
 ./configure
 make
 make install
 cd ..
-mvn package
+./gradlew publishToMavenLocal
 ```
 
-If you hope to install to your local maven, then you should run:
-
-```
-mvn install -Dgpg.skip=true
-```
-
-Building Windows 64bit with CMake & NMake
------------------------------------------
+Building Windows 64bit with CMake & NMake (NOT TESTED)
+------------------------------------------------------
 
 It is recommended to follow these steps with the *Visual C++ 2015 Build Tools*.
 
