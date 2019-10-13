@@ -12,6 +12,7 @@ addons:
       - make
       - pkg-config
       - automake
+      - autoconf-archive
       - libtool
 # https://software.opensuse.org/download.html?project=network%3Amessaging%3Azeromq%3Arelease-stable&package=libzmq3-dev
       - libzmq3-dev
