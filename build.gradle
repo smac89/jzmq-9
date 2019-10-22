@@ -9,10 +9,6 @@ allprojects {
 
     group 'org.zeromq'
     version '3.1.1'
-
-    ext {
-
-    }
 }
 
 // POM reference: https://maven.apache.org/pom.html

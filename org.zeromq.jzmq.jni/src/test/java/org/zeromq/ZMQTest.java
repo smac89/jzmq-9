@@ -32,13 +32,13 @@ public class ZMQTest {
     public final ExternalResource contextRule = new ExternalResource() {
         @Override
         protected void before() {
-//            context = ZMQ.context(1);
+            context = ZMQ.context(1);
         }
 
         @Override
         protected void after() {
             try {
-//                context.close();
+                context.close();
             } catch (Exception ignore) {
             }
         }
@@ -67,13 +67,12 @@ public class ZMQTest {
      */
     @Test
     public void testBindToRandomPort() {
-        ZMQ.Context context = ZMQ.context(1);
         ZMQ.Socket sock = context.socket(ZMQ.DEALER);
 
         // Check that bindToRandomport generate valid port number
-//        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 100; i++) {
             sock.bindToRandomPort("tcp://127.0.0.1");
-//        }
+        }
 
         sock.close();
         sock = context.socket(ZMQ.DEALER);
@@ -86,8 +85,6 @@ public class ZMQTest {
         } catch (ZMQException e) {
             assertEquals(e.getErrorCode(), ZMQ.EPROTONOSUPPORT());
         }
-
-        context.close();
     }
 
     /**
