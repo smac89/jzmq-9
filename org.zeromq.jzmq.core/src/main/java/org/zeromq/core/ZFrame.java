@@ -2,8 +2,10 @@ package org.zeromq.core;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import java.util.Objects;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Error;
 import org.zeromq.ZMQ.Socket;
@@ -21,7 +23,7 @@ import org.zeromq.ZMQException;
  */
 public class ZFrame
 {
-    private static Charset ENCODING = Charset.forName("UTF-8");
+    private static Charset ENCODING = StandardCharsets.UTF_8;
 
     private byte[] data;
     private boolean more;

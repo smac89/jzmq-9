@@ -47,7 +47,7 @@ public class ZCertStore {
 		File root = new File(path);
 		traverseDirectory(root, visitor);
 	}
-	private void traverseDirectory(File root,IFileVisitor visitor) {
+	private void traverseDirectory(File root, IFileVisitor visitor) {
 		if (!root.exists()) {
 			throw new RuntimeException("There is no path:"+root.getPath());
 		}

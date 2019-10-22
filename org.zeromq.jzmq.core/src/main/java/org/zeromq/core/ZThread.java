@@ -6,12 +6,12 @@ import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMQException;
 
 public class ZThread {
-    public static interface IAttachedRunnable {
-        public void run(Object[] args, ZContext ctx, Socket pipe);
+    public interface IAttachedRunnable {
+        void run(Object[] args, ZContext ctx, Socket pipe);
     }
 
-    public static interface IDetachedRunnable {
-        public void run(Object[] args);
+    public interface IDetachedRunnable {
+        void run(Object[] args);
     }
 
     private static class ShimThread extends Thread {
@@ -21,7 +21,7 @@ public class ZThread {
         private Object[] args;
         private Socket pipe;
 
-        protected ShimThread(ZContext ctx, IAttachedRunnable runnable, Object[] args, Socket pipe) {
+        ShimThread(ZContext ctx, IAttachedRunnable runnable, Object[] args, Socket pipe) {
             assert (ctx != null);
             assert (pipe != null);
             assert (runnable != null);
@@ -32,7 +32,7 @@ public class ZThread {
             this.pipe = pipe;
         }
 
-        public ShimThread(IDetachedRunnable runnable, Object[] args) {
+        ShimThread(IDetachedRunnable runnable, Object[] args) {
             assert (runnable != null);
             this.detachedRunnable = runnable;
             this.args = args;

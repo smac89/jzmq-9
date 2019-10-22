@@ -1602,7 +1602,6 @@ public class ZMQ {
                     if (e.getErrorCode() != ZMQ.EADDRINUSE()) {
                         throw e;
                     }
-                    continue;
                 }
             }
             throw new ZMQException("Could not bind socket to random port.", (int) ZMQ.EADDRINUSE());
@@ -1903,6 +1902,15 @@ public class ZMQ {
          */
         private long getSocketHandle() {
             return this.socketHandle;
+        }
+
+        /**
+         * Add a closed check to the socket so that we do not attempt to close it again
+         * @see #close()
+         * @return True if the socket has been closed
+         */
+        public boolean isClosed() {
+            return closed.get();
         }
 
         /** Opaque data used by JNI driver. */

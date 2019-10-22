@@ -55,7 +55,7 @@ public class ZContext implements Closeable {
      */
     public ZContext() {
         context = null; // Don't create Context until create 1st 0MQ socket
-        sockets = new CopyOnWriteArrayList<Socket>();
+        sockets = new CopyOnWriteArrayList<>();
         ioThreads = 1;
         linger = 0;
         main = true;
@@ -65,9 +65,8 @@ public class ZContext implements Closeable {
      * Destructor. Call this to gracefully terminate context and close any managed 0MQ sockets
      */
     public void destroy() {
-        ListIterator<Socket> itr = sockets.listIterator();
-        while (itr.hasNext()) {
-            destroySocket(itr.next());
+        for (Socket socket : sockets) {
+            destroySocket(socket);
         }
         sockets.clear();
 
@@ -104,14 +103,16 @@ public class ZContext implements Closeable {
             return;
 
         if (sockets.contains(s)) {
-            try {
-                s.setLinger(linger);
-            } catch (ZMQException e) {
-                if (e.getErrorCode() != Error.ETERM.getCode()) {
-                    throw e;
+            if (!s.isClosed()) {
+                try {
+                    s.setLinger(linger);
+                } catch (ZMQException e) {
+                    if (e.getErrorCode() != Error.ETERM.getCode()) {
+                        throw e;
+                    }
                 }
+                s.close();
             }
-            s.close();
             sockets.remove(s);
         }
     }

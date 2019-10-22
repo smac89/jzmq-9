@@ -37,19 +37,23 @@ test {
     dependsOn jar
     doFirst {
         classpath += jar.outputs.files
-        jvmArgs '--illegal-access=warn'
-        jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
-        jvmArgs '--add-opens', 'java.base/java.io=ALL-UNNAMED'
-        jvmArgs '--add-opens', 'java.base/java.net=ALL-UNNAMED'
-        jvmArgs '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+        if (JavaVersion.current().isJava9Compatible()) {
+            jvmArgs '--illegal-access=warn'
+            jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+            jvmArgs '--add-opens', 'java.base/java.io=ALL-UNNAMED'
+            jvmArgs '--add-opens', 'java.base/java.net=ALL-UNNAMED'
+            jvmArgs '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+        }
         failFast true
     }
 }
 
 jar {
     doFirst {
-        manifest {
-            attributes('ModuleMainClass': mainClassName)
+        if (JavaVersion.current().isJava9Compatible()) {
+            manifest {
+                attributes('ModuleMainClass': mainClassName)
+            }
         }
     }
 

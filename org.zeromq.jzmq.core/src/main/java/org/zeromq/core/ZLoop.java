@@ -34,35 +34,32 @@ import org.zeromq.ZMQ.Poller;
 
 public class ZLoop {
 
-    public static interface IZLoopHandler {
-        public int handle(ZLoop loop, PollItem item, Object arg);
+    public interface IZLoopHandler {
+        int handle(ZLoop loop, PollItem item, Object arg);
     }
 
-    private class SPoller {
+    private static class SPoller {
         PollItem item;
         IZLoopHandler handler;
         Object arg;
         int errors; // If too many errors, kill poller
 
-        protected SPoller(PollItem item, IZLoopHandler handler, Object arg) {
+        SPoller(PollItem item, IZLoopHandler handler, Object arg) {
             this.item = item;
             this.handler = handler;
             this.arg = arg;
             errors = 0;
         }
-
     }
 
-    ;
-
-    private class STimer {
+    private static class STimer {
         int delay;
         int times;
         IZLoopHandler handler;
         Object arg;
         long when; // Clock time when alarm goes off
 
-        public STimer(int delay, int times, IZLoopHandler handler, Object arg) {
+        STimer(int delay, int times, IZLoopHandler handler, Object arg) {
             this.delay = delay;
             this.times = times;
             this.handler = handler;

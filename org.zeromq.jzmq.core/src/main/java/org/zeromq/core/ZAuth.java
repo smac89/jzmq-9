@@ -35,7 +35,7 @@ public class ZAuth {
      */
     public static class ZAPRequest {
 
-        public Socket handler;              //socket we're talking to
+        public Socket handler;              // socket we're talking to
         public String version;              //  Version number, must be "1.0"
         public String sequence;             //  Sequence number of request
         public String domain;               //  Server socket domain
@@ -67,15 +67,19 @@ public class ZAuth {
                 assert (self.version.equals("1.0"));
 
                 // Get mechanism-specific frames
-                if (self.mechanism.equals("PLAIN")) {
-                    self.username = request.popString();
-                    self.password = request.popString();
-                } else if (self.mechanism.equals("CURVE")) {
-                	ZFrame frame = request.pop();
-                	byte[] clientPublicKey = frame.getData();
-                	self.clientKey = ZMQ.Curve.z85Encode(clientPublicKey);
-                } else if (self.mechanism.equals("GSSAPI")) {
-                    self.principal = request.popString();
+                switch (self.mechanism) {
+                    case "PLAIN":
+                        self.username = request.popString();
+                        self.password = request.popString();
+                        break;
+                    case "CURVE":
+                        ZFrame frame = request.pop();
+                        byte[] clientPublicKey = frame.getData();
+                        self.clientKey = ZMQ.Curve.z85Encode(clientPublicKey);
+                        break;
+                    case "GSSAPI":
+                        self.principal = request.popString();
+                        break;
                 }
 
                 request.destroy();
@@ -148,58 +152,72 @@ public class ZAuth {
             if (command == null) {
                 return false; //interrupted
             }
-            if (command.equals("ALLOW")) {
-                String address = msg.popString();
-                if (verbose) {
-                	System.out.printf("ZAuth: - whitelisting ipaddress=%s\n", address);
+            switch (command) {
+                case "ALLOW": {
+                    String address = msg.popString();
+                    if (verbose) {
+                        System.out.printf("ZAuth: - whitelisting ipaddress=%s\n", address);
+                    }
+                    whitelist.put(address, "OK");
+                    break;
                 }
-                whitelist.put(address, "OK");
-            } else if (command.equals("DENY")) {
-                String address = msg.popString();
-                if (verbose) {
-                	System.out.printf("ZAuth: - blacklisting ipaddress=%s\n", address);
+                case "DENY": {
+                    String address = msg.popString();
+                    if (verbose) {
+                        System.out.printf("ZAuth: - blacklisting ipaddress=%s\n", address);
+                    }
+                    blacklist.put(address, "OK");
+                    break;
                 }
-                blacklist.put(address, "OK");
-            } else if (command.equals("PLAIN")) {
-                // For now we don't do anything with domains
-                String domain = msg.popString();
-                // Get password file and load into HashMap
-                // If the file doesn't exist we'll get an empty map
-                String filename = msg.popString();
-                this.passwords_file = new File(filename);
+                case "PLAIN": {
+                    // For now we don't do anything with domains
+                    String domain = msg.popString();
+                    // Get password file and load into HashMap
+                    // If the file doesn't exist we'll get an empty map
+                    String filename = msg.popString();
+                    this.passwords_file = new File(filename);
 
-                if (verbose) {
-            		System.out.println("ZAuth: - activated plain-mechanism with password-file:"+this.passwords_file.getAbsolutePath());
-            	}
+                    if (verbose) {
+                        System.out.println("ZAuth: - activated plain-mechanism with password-file:"
+                                             + this.passwords_file.getAbsolutePath());
+                    }
 
-                this.loadPasswords(true);
+                    this.loadPasswords(true);
 
-                ZMsg reply = new ZMsg();
-                reply.add("OK");
-                reply.send(pipe);
-                reply.destroy();
-            } else if (command.equals("CURVE")) {
-                //  If location is CURVE_ALLOW_ANY, allow all clients. Otherwise
-                //  treat location as a directory that holds the certificates.
-            	String location = msg.popString();
-            	if (location.equals(CURVE_ALLOW_ANY)){
-            		allow_any=true;
-            	} else {
-            		this.certStore = new ZCertStore(location);
-            		this.allow_any = false;
-            	}
-            } else if (command.equals("GSSAPI")) {
-                //for now, we don't do anything with domains
-                String domain = msg.popString();
-            } else if (command.equals("VERBOSE")) {
-                String verboseStr = msg.popString();
-                this.verbose = verboseStr.equals("true");
-            } else if (command.equals("TERMINATE")) {
-                this.terminated = true;
-                ZMsg reply = new ZMsg();
-                reply.add("OK");
-                reply.send(pipe);
-                reply.destroy();
+                    ZMsg reply = new ZMsg();
+                    reply.add("OK");
+                    reply.send(pipe);
+                    reply.destroy();
+                    break;
+                }
+                case "CURVE":
+                    //  If location is CURVE_ALLOW_ANY, allow all clients. Otherwise
+                    //  treat location as a directory that holds the certificates.
+                    String location = msg.popString();
+                    if (location.equals(CURVE_ALLOW_ANY)) {
+                        allow_any = true;
+                    } else {
+                        this.certStore = new ZCertStore(location);
+                        this.allow_any = false;
+                    }
+                    break;
+                case "GSSAPI": {
+                    //for now, we don't do anything with domains
+                    String domain = msg.popString();
+                    break;
+                }
+                case "VERBOSE":
+                    String verboseStr = msg.popString();
+                    this.verbose = verboseStr.equals("true");
+                    break;
+                case "TERMINATE": {
+                    this.terminated = true;
+                    ZMsg reply = new ZMsg();
+                    reply.add("OK");
+                    reply.send(pipe);
+                    reply.destroy();
+                    break;
+                }
             }
 
             msg.destroy();

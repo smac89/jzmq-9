@@ -7,6 +7,7 @@ import org.zeromq.ZMQException;
 import org.zeromq.core.ZContext;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -20,7 +21,7 @@ public class ZContextTest {
     @Test
     public void testConstruction() {
         ZContext ctx = new ZContext();
-        assertTrue(ctx != null);
+        assertNotNull(ctx);
         assertEquals(1, ctx.getIoThreads());
         assertEquals(0, ctx.getLinger());
         assertTrue(ctx.isMain());
@@ -39,7 +40,7 @@ public class ZContextTest {
         Socket s = ctx1.createSocket(ZMQ.PAIR);
         ctx1.destroy();
         assertTrue(ctx1.getSockets().isEmpty());
-        assertTrue(ctx1.getContext() != null);
+        assertNotNull(ctx1.getContext());
     }
 
     @Test
@@ -48,10 +49,10 @@ public class ZContextTest {
         ZContext ctx = new ZContext();
         try {
             Socket s = ctx.createSocket(ZMQ.PUB);
-            assertTrue(s != null);
-            assertTrue(s.getType() == ZMQ.PUB);
+            assertNotNull(s);
+            assertEquals(s.getType(), ZMQ.PUB);
             Socket s1 = ctx.createSocket(ZMQ.REQ);
-            assertTrue(s1 != null);
+            assertNotNull(s1);
             assertEquals(2, ctx.getSockets().size());
         } finally {
             ctx.destroy();
@@ -63,7 +64,7 @@ public class ZContextTest {
         ZContext ctx = new ZContext();
         try {
             Socket s = ctx.createSocket(ZMQ.PUB);
-            assertTrue(s != null);
+            assertNotNull(s);
             assertEquals(1, ctx.getSockets().size());
 
             ctx.destroySocket(s);
@@ -77,7 +78,7 @@ public class ZContextTest {
     public void testShadow() {
         ZContext ctx = new ZContext();
         Socket s = ctx.createSocket(ZMQ.PUB);
-        assertTrue(s != null);
+        assertNotNull(s);
         assertEquals(1, ctx.getSockets().size());
 
         ZContext shadowCtx = ZContext.shadow(ctx);

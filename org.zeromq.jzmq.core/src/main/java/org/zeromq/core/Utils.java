@@ -1,15 +1,13 @@
 package org.zeromq.core;
 
-public class Utils
-{
-    private Utils()
-    {
+import java.util.Objects;
+
+public class Utils {
+
+    private Utils() {
     }
 
-    public static void checkNotNull(Object obj)
-    {
-        if (obj == null) {
-            throw new IllegalArgumentException("Argument must not be null");
-        }
+    public static void checkNotNull(Object obj) {
+        Objects.requireNonNull(obj, "Argument must not be null");
     }
 }

@@ -1,30 +1,48 @@
 package org.zeromq;
 
-import java.nio.charset.StandardCharsets;
-import org.junit.Assert;
-import org.junit.Test;
-import org.zeromq.ZMQ.Context;
-import org.zeromq.ZMQ.Event;
-import org.zeromq.ZMQ.Poller;
-import org.zeromq.ZMQ.Socket;
-
-import javax.xml.bind.DatatypeConverter;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import javax.xml.bind.DatatypeConverter;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExternalResource;
+import org.zeromq.ZMQ.Context;
+import org.zeromq.ZMQ.Event;
+import org.zeromq.ZMQ.Poller;
+import org.zeromq.ZMQ.Socket;
 
 /**
  * @author Cliff Evans
  */
 public class ZMQTest {
+    private ZMQ.Context context;
+
+    @Rule
+    public final ExternalResource contextRule = new ExternalResource() {
+        @Override
+        protected void before() {
+//            context = ZMQ.context(1);
+        }
+
+        @Override
+        protected void after() {
+            try {
+//                context.close();
+            } catch (Exception ignore) {
+            }
+        }
+    };
 
     /**
      * Test method for {@link org.zeromq.ZMQ#makeVersion(int, int, int)}.
@@ -53,9 +71,9 @@ public class ZMQTest {
         ZMQ.Socket sock = context.socket(ZMQ.DEALER);
 
         // Check that bindToRandomport generate valid port number
-        for (int i = 0; i < 100; i++) {
+//        for (int i = 0; i < 100; i++) {
             sock.bindToRandomPort("tcp://127.0.0.1");
-        }
+//        }
 
         sock.close();
         sock = context.socket(ZMQ.DEALER);
@@ -68,6 +86,8 @@ public class ZMQTest {
         } catch (ZMQException e) {
             assertEquals(e.getErrorCode(), ZMQ.EPROTONOSUPPORT());
         }
+
+        context.close();
     }
 
     /**
@@ -75,7 +95,6 @@ public class ZMQTest {
      */
     @Test
     public void testBindToSystemRandomPort() {
-        ZMQ.Context context = ZMQ.context(1);
         ZMQ.Socket sock = context.socket(ZMQ.DEALER);
 
         sock.bindToSystemRandomPort("tcp://127.0.0.1");
@@ -84,8 +103,6 @@ public class ZMQTest {
 
     @Test
     public void testReqRep() {
-        ZMQ.Context context = ZMQ.context(1);
-
         ZMQ.Socket in = context.socket(ZMQ.REQ);
         in.bind("inproc://reqrep");
 
@@ -112,8 +129,6 @@ public class ZMQTest {
             // Can only test XPUB on ZMQ >= of 3.0
             return;
         }
-
-        ZMQ.Context context = ZMQ.context(1);
 
         ZMQ.Socket pub = context.socket(ZMQ.XPUB);
         pub.bind("inproc://xpub");
@@ -167,7 +182,6 @@ public class ZMQTest {
             // Can only test ZMQ_XPUB_VERBOSE on ZMQ >= of 3.2.2
             return;
         }
-        ZMQ.Context context = ZMQ.context(1);
 
         byte[] topic = "topic".getBytes();
         byte[] subscription = new byte[topic.length + 1];
@@ -199,12 +213,11 @@ public class ZMQTest {
             }
         }
 
-        for (int i = 0; i < xsubs.length; i++) {
-            xsubs[i].close();
+        for (Socket xsub : xsubs) {
+            xsub.close();
         }
         xpubVerbose.close();
         xpubDefault.close();
-        context.term();
     }
 
     /**
@@ -212,32 +225,25 @@ public class ZMQTest {
      */
     @Test
     public void testSetOption() {
-        ZMQ.Context context = ZMQ.context(1);
-
         ZMQ.Socket sock = context.socket(ZMQ.REQ);
 
         if (ZMQ.getFullVersion() >= ZMQ.makeVersion(3, 2, 0)) {
             sock.setIPv4Only(false);
-            assertEquals(false, sock.getIPv4Only());
+            assertFalse(sock.getIPv4Only());
 
             sock.setIPv4Only(true);
-            assertEquals(true, sock.getIPv4Only());
+            assertTrue(sock.getIPv4Only());
         }
         sock.close();
-
-        context.term();
     }
 
     static class Client extends Thread {
 
-        private Socket s = null;
-        private String name = null;
+        private Socket s;
 
-        public Client(Context ctx, String name_) {
+        Client(Context ctx, String name_) {
             s = ctx.socket(ZMQ.REQ);
-            name = name_;
-
-            s.setIdentity(name.getBytes());
+            s.setIdentity(name_.getBytes());
         }
 
         @Override
@@ -254,14 +260,11 @@ public class ZMQTest {
 
     static class Dealer extends Thread {
 
-        private Socket s = null;
-        private String name = null;
+        private Socket s;
 
-        public Dealer(Context ctx, String name_) {
+        Dealer(Context ctx, String name_) {
             s = ctx.socket(ZMQ.DEALER);
-            name = name_;
-
-            s.setIdentity(name.getBytes());
+            s.setIdentity(name_.getBytes());
         }
 
         @Override
@@ -331,25 +334,20 @@ public class ZMQTest {
             return;
         }
 
-        Context ctx = ZMQ.context(1);
-        assert (ctx != null);
-
-        Main mt = new Main(ctx);
+        Main mt = new Main(context);
         mt.start();
-        new Dealer(ctx, "AA").start();
-        new Dealer(ctx, "BB").start();
+        new Dealer(context, "AA").start();
+        new Dealer(context, "BB").start();
 
         Thread.sleep(1000);
-        Thread c1 = new Client(ctx, "X");
+        Thread c1 = new Client(context, "X");
         c1.start();
 
-        Thread c2 = new Client(ctx, "Y");
+        Thread c2 = new Client(context, "Y");
         c2.start();
 
         c1.join();
         c2.join();
-
-        ctx.term();
     }
 
     /**
@@ -360,87 +358,51 @@ public class ZMQTest {
         if (ZMQ.getFullVersion() < ZMQ.makeVersion(3, 2, 0))
             return;
 
-        ZMQ.Context context = ZMQ.context(1);
-
         ZMQ.Socket sock = context.socket(ZMQ.ROUTER);
         boolean ret = sock.sendMore("UNREACHABLE");
-        assertEquals(true, ret);
+        assertTrue(ret);
         sock.send("END");
 
         sock.setRouterMandatory(true);
         try {
             sock.sendMore("UNREACHABLE");
-            assertFalse(true);
+            fail();
         } catch (ZMQException e) {
             assertEquals(ZMQ.EHOSTUNREACH(), e.getErrorCode());
         }
 
         sock.close();
-        context.term();
     }
 
     @Test
     public void testSendMoreRequestReplyOverTcp() {
-        ZMQ.Context context = ZMQ.context(1);
-        ZMQ.Socket reply = null;
-        ZMQ.Socket socket = null;
-        try {
-            reply = context.socket(ZMQ.REP);
+        try (ZMQ.Socket reply = context.socket(ZMQ.REP); ZMQ.Socket socket = context.socket(ZMQ.REQ)) {
             reply.bind("tcp://*:12345");
-            socket = context.socket(ZMQ.REQ);
             socket.connect("tcp://localhost:12345");
             socket.send("test1", ZMQ.SNDMORE);
             socket.send("test2");
             assertEquals("test1", reply.recvStr(ZMQ.CHARSET));
             assertTrue(reply.hasReceiveMore());
             assertEquals("test2", reply.recvStr(ZMQ.CHARSET));
-        } finally {
-            try {
-                socket.close();
-            } catch (Exception ignore){}
-            try {
-                reply.close();
-            } catch (Exception ignore){}
-            try {
-                context.term();
-            } catch (Exception ignore) {}
         }
     }
 
     @Test
     public void testWritingToClosedSocket() {
-        ZMQ.Context context = ZMQ.context(1);
-        ZMQ.Socket sock = null;
-        try {
-            sock = context.socket(ZMQ.REQ);
+        try (Socket sock = context.socket(ZMQ.REQ)) {
             sock.connect("ipc:///tmp/hai");
             sock.close();
             sock.send("PING".getBytes(), 0);
         } catch (ZMQException e) {
             assertEquals(ZMQ.ENOTSOCK(), e.getErrorCode());
-        } finally {
-            try {
-                sock.close();
-            } catch (Exception ignore) {
-            }
-            try {
-                context.term();
-            } catch (Exception ignore) {
-            }
         }
     }
 
     @Test
     public void testZeroCopyRecv() {
         if (ZMQ.version_full() >= ZMQ.make_version(3, 0, 0)) {
-            ZMQ.Context context = ZMQ.context(1);
-
             ByteBuffer response = ByteBuffer.allocateDirect(1024).order(ByteOrder.nativeOrder());
-            ZMQ.Socket push = null;
-            ZMQ.Socket pull = null;
-            try {
-                push = context.socket(ZMQ.PUSH);
-                pull = context.socket(ZMQ.PULL);
+            try (Socket push = context.socket(ZMQ.PUSH); Socket pull = context.socket(ZMQ.PULL)) {
                 pull.bind("tcp://*:45324");
                 push.connect("tcp://localhost:45324");
 
@@ -450,65 +412,29 @@ public class ZMQTest {
                 byte[] b = new byte[rc];
                 response.get(b);
                 assertEquals("PING", new String(b));
-            } finally {
-                try {
-                    push.close();
-                } catch (Exception ignore) {
-                }
-                try {
-                    pull.close();
-                } catch (Exception ignore) {
-                }
-                try {
-                    context.term();
-                } catch (Exception ignore) {
-                }
             }
         }
     }
 
     @Test
-    public void testZeroCopySend() throws InterruptedException {
+    public void testZeroCopySend() {
         if (ZMQ.version_full() >= ZMQ.make_version(3, 0, 0)) {
-            ZMQ.Context context = ZMQ.context(1);
             ByteBuffer bb = ByteBuffer.allocateDirect(1024).order(ByteOrder.nativeOrder());
-            ZMQ.Socket push = null;
-            ZMQ.Socket pull = null;
-            try {
-                push = context.socket(ZMQ.PUSH);
-                pull = context.socket(ZMQ.PULL);
+            try (Socket push = context.socket(ZMQ.PUSH); Socket pull = context.socket(ZMQ.PULL)) {
                 pull.bind("tcp://*:45324");
                 push.connect("tcp://localhost:45324");
                 bb.put("PING".getBytes());
                 push.sendZeroCopy(bb, bb.position(), 0);
                 assertEquals("PING", new String(pull.recv()));
-            } finally {
-                try {
-                    push.close();
-                } catch (Exception ignore) {
-                }
-                try {
-                    pull.close();
-                } catch (Exception ignore) {
-                }
-                try {
-                    context.term();
-                } catch (Exception ignore) {
-                }
             }
         }
     }
 
     @Test
-    public void testByteBufferSend() throws InterruptedException {
+    public void testByteBufferSend() {
         if (ZMQ.version_full() >= ZMQ.make_version(3, 0, 0)) {
-            ZMQ.Context context = ZMQ.context(1);
             ByteBuffer bb = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder());
-            ZMQ.Socket push = null;
-            ZMQ.Socket pull = null;
-            try {
-                push = context.socket(ZMQ.PUSH);
-                pull = context.socket(ZMQ.PULL);
+            try (Socket push = context.socket(ZMQ.PUSH); Socket pull = context.socket(ZMQ.PULL)) {
                 pull.bind("ipc:///tmp/sendbb");
                 push.connect("ipc:///tmp/sendbb");
                 bb.put("PING".getBytes());
@@ -517,33 +443,15 @@ public class ZMQTest {
                 String actual = new String(pull.recv());
                 System.out.println(actual);
                 assertEquals("PING", actual);
-            } finally {
-                try {
-                    push.close();
-                } catch (Exception ignore) {
-                }
-                try {
-                    pull.close();
-                } catch (Exception ignore) {
-                }
-                try {
-                    context.term();
-                } catch (Exception ignore) {
-                }
             }
         }
     }
 
     @Test
-    public void testByteBufferRecv() throws InterruptedException, CharacterCodingException {
+    public void testByteBufferRecv() {
         if (ZMQ.version_full() >= ZMQ.make_version(3, 0, 0)) {
-            ZMQ.Context context = ZMQ.context(1);
             ByteBuffer bb = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder());
-            ZMQ.Socket push = null;
-            ZMQ.Socket pull = null;
-            try {
-                push = context.socket(ZMQ.PUSH);
-                pull = context.socket(ZMQ.PULL);
+            try (Socket push = context.socket(ZMQ.PUSH); Socket pull = context.socket(ZMQ.PULL)) {
                 pull.bind("ipc:///tmp/recvbb");
                 push.connect("ipc:///tmp/recvbb");
                 push.send("PING".getBytes(), 0);
@@ -552,33 +460,15 @@ public class ZMQTest {
                 byte[] b = new byte[4];
                 bb.get(b);
                 assertEquals("PING", new String(b));
-            } finally {
-                try {
-                    push.close();
-                } catch (Exception ignore) {
-                }
-                try {
-                    pull.close();
-                } catch (Exception ignore) {
-                }
-                try {
-                    context.term();
-                } catch (Exception ignore) {
-                }
             }
         }
     }
 
     @Test
-    public void testByteBufferRecvTooLarge() throws InterruptedException, CharacterCodingException {
+    public void testByteBufferRecvTooLarge() {
         if (ZMQ.version_full() >= ZMQ.make_version(3, 0, 0)) {
-            ZMQ.Context context = ZMQ.context(1);
             ByteBuffer bb = ByteBuffer.allocateDirect(5).order(ByteOrder.nativeOrder());
-            ZMQ.Socket push = null;
-            ZMQ.Socket pull = null;
-            try {
-                push = context.socket(ZMQ.PUSH);
-                pull = context.socket(ZMQ.PULL);
+            try (Socket push = context.socket(ZMQ.PUSH); Socket pull = context.socket(ZMQ.PULL)) {
                 pull.bind("tcp://*:6787");
                 push.connect("tcp://127.0.0.1:6787");
                 push.send("helloworld".getBytes(), 0);
@@ -587,25 +477,11 @@ public class ZMQTest {
                 byte[] b = new byte[size];
                 bb.get(b);
                 assertEquals("hello", new String(b));
-            } finally {
-                try {
-                    push.close();
-                } catch (Exception ignore) {
-                }
-                try {
-                    pull.close();
-                } catch (Exception ignore) {
-                }
-                try {
-                    context.term();
-                } catch (Exception ignore) {
-                }
             }
         }
     }
     @Test
     public void testPollerUnregister() {
-        Context context = ZMQ.context(1);
         Socket socketOne = context.socket(ZMQ.SUB);
         Socket socketTwo = context.socket(ZMQ.REP);
         Poller poller = new ZMQ.Poller(2);
@@ -619,29 +495,22 @@ public class ZMQTest {
 
         poller.unregister(socketOne);
         poller.unregister(socketTwo);
-
-        context.term();
     }
 
     @Test(expected = ZMQException.class)
     public void testPollingInvalidSockets() {
-        Context context = ZMQ.context(1);
         Poller poller = new ZMQ.Poller(1);
         Socket socketOne = context.socket(ZMQ.SUB);
 
         poller.register(socketOne, ZMQ.Poller.POLLIN);
         socketOne.close();
         poller.poll(100);
-
-        context.term();
     }
 
     @Test
     public void testEventConnected() {
         if (ZMQ.version_full() < ZMQ.make_version(3, 2, 2)) // Monitor added in 3.2.2
             return;
-
-        Context context = ZMQ.context(1);
         Event event;
 
         Socket helper = context.socket(ZMQ.REQ);
@@ -662,7 +531,6 @@ public class ZMQTest {
         helper.close();
         socket.close();
         monitor.close();
-        context.term();
     }
 
     @Test
@@ -670,7 +538,6 @@ public class ZMQTest {
         if (ZMQ.version_full() < ZMQ.make_version(3, 2, 2)) // Monitor added in 3.2.2
             return;
 
-        Context context = ZMQ.context(1);
         Event event;
 
         Socket socket = context.socket(ZMQ.REP);
@@ -687,7 +554,6 @@ public class ZMQTest {
 
         socket.close();
         monitor.close();
-        context.term();
     }
 
     @Test
@@ -695,7 +561,6 @@ public class ZMQTest {
         if (ZMQ.version_full() < ZMQ.make_version(3, 2, 2)) // Monitor added in 3.2.2
             return;
 
-        Context context = ZMQ.context(1);
         Event event;
 
         Socket socket = context.socket(ZMQ.REP);
@@ -712,7 +577,6 @@ public class ZMQTest {
 
         socket.close();
         monitor.close();
-        context.term();
     }
 
     @Test
@@ -720,7 +584,6 @@ public class ZMQTest {
         if (ZMQ.version_full() < ZMQ.make_version(3, 2, 2)) // Monitor added in 3.2.2
             return;
 
-        Context context = ZMQ.context(1);
         Event event;
 
         Socket socket = context.socket(ZMQ.REP);
@@ -737,7 +600,6 @@ public class ZMQTest {
 
         socket.close();
         monitor.close();
-        context.term();
     }
 
     @Test
@@ -745,7 +607,6 @@ public class ZMQTest {
         if (ZMQ.version_full() < ZMQ.make_version(3, 2, 2)) // Monitor added in 3.2.2
             return;
 
-        Context context = ZMQ.context(1);
         ZMQ.Event event;
 
         Socket helper = context.socket(ZMQ.REP);
@@ -760,7 +621,7 @@ public class ZMQTest {
 
         try {
             socket.bind("tcp://127.0.0.1:" + port);
-        } catch (ZMQException ex) {}
+        } catch (ZMQException ignored) {}
         event = ZMQ.Event.recv(monitor);
         assertNotNull("No event was received", event);
         assertEquals(ZMQ.EVENT_BIND_FAILED, event.getEvent());
@@ -768,7 +629,6 @@ public class ZMQTest {
         helper.close();
         socket.close();
         monitor.close();
-        context.term();
     }
 
     @Test
@@ -776,7 +636,6 @@ public class ZMQTest {
         if (ZMQ.version_full() < ZMQ.make_version(3, 2, 2)) // Monitor added in 3.2.2
             return;
 
-        Context context = ZMQ.context(1);
         Event event;
 
         Socket socket = context.socket(ZMQ.REP);
@@ -797,7 +656,6 @@ public class ZMQTest {
         helper.close();
         socket.close();
         monitor.close();
-        context.term();
     }
 
     @Test
@@ -805,7 +663,6 @@ public class ZMQTest {
         if (ZMQ.version_full() < ZMQ.make_version(3, 2, 2)) // Monitor added in 3.2.2
             return;
 
-        Context context = ZMQ.context(1);
         Event event;
 
         Socket socket = context.socket(ZMQ.REP);
@@ -823,7 +680,6 @@ public class ZMQTest {
         assertEquals(ZMQ.EVENT_CLOSED, event.getEvent());
 
         monitor.close();
-        context.term();
     }
 
     @Test
@@ -831,7 +687,6 @@ public class ZMQTest {
         if (ZMQ.version_full() < ZMQ.make_version(3, 2, 2)) // Monitor added in 3.2.2
             return;
 
-        Context context = ZMQ.context(1);
         Event event;
 
         Socket socket = context.socket(ZMQ.REP);
@@ -856,7 +711,6 @@ public class ZMQTest {
 
         socket.close();
         monitor.close();
-        context.term();
     }
 
     @Test
@@ -864,7 +718,6 @@ public class ZMQTest {
         if (ZMQ.version_full() < ZMQ.make_version(4, 0, 0)) // EVENT_MONITOR_STOPPED added in 4.0.0
             return;
 
-        Context context = ZMQ.context(1);
         Event event;
 
         Socket socket = context.socket(ZMQ.REP);
@@ -881,7 +734,6 @@ public class ZMQTest {
 
         socket.close();
         monitor.close();
-        context.term();
     }
 
     @Test
@@ -889,7 +741,7 @@ public class ZMQTest {
         if (ZMQ.getFullVersion() < ZMQ.makeVersion(4, 0, 0))
             return;
 
-        final Charset utf8 = Charset.forName("UTF-8");
+        final Charset utf8 = StandardCharsets.UTF_8;
         final String endpoint = "tcp://127.0.0.1:5000";
 
         final ZMQ.Curve.KeyPair req_key = ZMQ.Curve.generateKeyPair();
@@ -899,8 +751,6 @@ public class ZMQTest {
         final byte[] req_sk = req_key.secretKey.getBytes(utf8);
         final byte[] rep_pk = rep_key.publicKey.getBytes(utf8);
         final byte[] rep_sk = rep_key.secretKey.getBytes(utf8);
-
-        ZMQ.Context context = ZMQ.context(1);
 
         ZMQ.Socket rep = context.socket(ZMQ.REP);
         rep.setCurveServer(true);
@@ -920,7 +770,6 @@ public class ZMQTest {
 
         req.close();
         rep.close();
-        context.term();
     }
 
     @Test
@@ -940,8 +789,6 @@ public class ZMQTest {
         final byte[] rep_sk = DatatypeConverter.parseHexBinary(
                 "8E0BDD697628B91D8F245587EE95C5B04D48963F79259877B49CD9063AEAD3B7");
 
-        ZMQ.Context context = ZMQ.context(1);
-
         ZMQ.Socket rep = context.socket(ZMQ.REP);
         rep.setCurveServer(true);
         rep.setCurveSecretKey(rep_sk);
@@ -960,7 +807,6 @@ public class ZMQTest {
 
         req.close();
         rep.close();
-        context.term();
     }
 
     @Test
