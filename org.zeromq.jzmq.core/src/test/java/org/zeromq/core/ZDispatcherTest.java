@@ -228,7 +228,7 @@ public class ZDispatcherTest {
         System.out.println(MessageFormat.format("performanceTest message sent:{0}", nMessages));
         latch.await();
         Instant end = Instant.now();
-        double elapsedSeconds = Duration.between(start, end).toSeconds();
+        double elapsedSeconds = Duration.between(start, end).toMillis() / 1_000.0;
         if (elapsedSeconds > 0) {
             System.out.println(MessageFormat.format("performanceTest throughput:{0} messages/second", nMessages/elapsedSeconds));
         } else {
