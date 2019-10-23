@@ -1,12 +1,12 @@
-dist: bionic
+dist: trusty
 language: java
 
 addons:
   apt:
     update: true
     sources:
-      - sourceline: 'deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_18.04/ /'
-        key_url: 'https://download.opensuse.org/repositories/network:messaging:zeromq:release-stable/xUbuntu_18.04/Release.key'
+      - sourceline: 'deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_14.04/ /'
+        key_url: 'https://download.opensuse.org/repositories/network:messaging:zeromq:release-stable/xUbuntu_14.04/Release.key'
     packages:
       - build-essential
       - make
@@ -20,7 +20,6 @@ addons:
 matrix:
   fast_finish: true
   include:
-    - jdk: oraclejdk7
     - jdk: oraclejdk8
     - jdk: oraclejdk9
     - jdk: oraclejdk11
@@ -32,5 +31,5 @@ matrix:
 install:
   - echo 'https://github.com/travis-ci/travis-ci/issues/8667'
 
-script: ./gradlew test
-after_script: ./gradlew --no-daemon publishToMavenLocal
+script: ./gradlew check
+after_script: ./gradlew publishToMavenLocal

@@ -84,7 +84,7 @@ public class ZMQ {
      *
      * @deprecated As of release 3.0 of zeromq, replaced by {@link #DEALER}
      */
-    @Deprecated(since = "3.0")
+    @Deprecated
     public static final int XREQ = DEALER;
     /**
      * Flag to specify ROUTER socket (aka XREP). ROUTER is the socket that creates and consumes request-reply routing
@@ -97,7 +97,7 @@ public class ZMQ {
      *
      * @deprecated As of release 3.0 of zeromq, replaced by {@link #ROUTER}
      */
-    @Deprecated(since = "3.0")
+    @Deprecated
     public static final int XREP = ROUTER;
     /**
      * Flag to specify the receiving part of a PUSH socket.
