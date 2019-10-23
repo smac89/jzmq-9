@@ -5,6 +5,7 @@ addons:
   apt:
     update: true
     sources:
+# https://software.opensuse.org/download.html?project=network%3Amessaging%3Azeromq%3Arelease-stable&package=libzmq3-dev
       - sourceline: 'deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/xUbuntu_14.04/ /'
         key_url: 'https://download.opensuse.org/repositories/network:messaging:zeromq:release-stable/xUbuntu_14.04/Release.key'
     packages:
@@ -14,22 +15,29 @@ addons:
       - automake
       - autoconf-archive
       - libtool
-# https://software.opensuse.org/download.html?project=network%3Amessaging%3Azeromq%3Arelease-stable&package=libzmq3-dev
       - libzmq3-dev
 
 matrix:
   fast_finish: true
   include:
     - jdk: oraclejdk8
+      env: TEST_WITH_JDK=oraclejdk8
     - jdk: oraclejdk9
+      env: TEST_WITH_JDK=oraclejdk9
     - jdk: oraclejdk11
-    - jdk: openjdk7
+      env: TEST_WITH_JDK=oraclejdk11
     - jdk: openjdk8
+      env: TEST_WITH_JDK=openjdk7
+    - jdk: openjdk8
+      env: TEST_WITH_JDK=openjdk8
     - jdk: openjdk9
+      env: TEST_WITH_JDK=openjdk9
     - jdk: openjdk11
+      env: TEST_WITH_JDK=openjdk11
 
 install:
   - echo 'https://github.com/travis-ci/travis-ci/issues/8667'
 
-script: ./gradlew check
+script: ./gradlew check -Dorg.gradle.java.home="$(jdk_switcher home $TEST_WITH_JDK)"
+
 after_script: ./gradlew publishToMavenLocal
