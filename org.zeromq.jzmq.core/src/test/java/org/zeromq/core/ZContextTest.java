@@ -7,6 +7,7 @@ import org.zeromq.ZMQException;
 import org.zeromq.core.ZContext;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -41,6 +42,16 @@ public class ZContextTest {
         ctx1.destroy();
         assertTrue(ctx1.getSockets().isEmpty());
         assertNotNull(ctx1.getContext());
+    }
+
+    @Test
+    public void testDestructionNoExceptionWhenSocketsClosed() {
+        ZContext context = new ZContext();
+        Socket s = context.createSocket(ZMQ.SUB);
+        assertFalse(context.getSockets().isEmpty());
+        s.close();
+        assertTrue(s.isClosed());
+        context.close();
     }
 
     @Test
