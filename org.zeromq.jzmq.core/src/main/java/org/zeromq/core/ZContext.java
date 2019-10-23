@@ -103,16 +103,16 @@ public class ZContext implements Closeable {
         }
 
         if (sockets.contains(s)) {
-            if (!s.isClosed()) {
-                try {
+            try {
+                if (!s.isClosed()) {
                     s.setLinger(linger);
-                } catch (ZMQException e) {
-                    if (e.getErrorCode() != Error.ETERM.getCode()) {
-                        throw e;
-                    }
                 }
-                s.close();
+            } catch (ZMQException e) {
+                if (e.getErrorCode() != Error.ETERM.getCode()) {
+                    throw e;
+                }
             }
+            s.close();
             sockets.remove(s);
         }
     }
