@@ -20,8 +20,12 @@ addons:
 matrix:
   fast_finish: true
   include:
+    - jdk: oraclejdk7
+    - jdk: oraclejdk8
     - jdk: oraclejdk9
     - jdk: oraclejdk11
+    - jdk: openjdk7
+    - jdk: openjdk8
     - jdk: openjdk9
     - jdk: openjdk11
 
