@@ -14,15 +14,14 @@ import org.zeromq.ZMQ.Socket;
 /**
  * Dispatcher for ZeroMQ Sockets.
  *
- * Warning:
- * The Dispatcher uses a busy spin loop when waiting on events.
- * This is ideal for low latency applications but not in all situations.
- * It has the side effect of consuming 100% of a CPU when waiting for events.
+ * Warning: The Dispatcher uses a busy spin loop when waiting on events. This is ideal for low
+ * latency applications but not in all situations. It has the side effect of consuming 100% of a CPU
+ * when waiting for events.
  *
- * With this dispatcher, you can register ONE handler per socket
- * and get a Sender for sending ZMsg.
+ * With this dispatcher, you can register ONE handler per socket and get a Sender for sending ZMsg.
  */
 public class ZDispatcher {
+
     private ConcurrentMap<Socket, SocketDispatcher> dispatchers = new ConcurrentHashMap<Socket, SocketDispatcher>();
     private final ExecutorService dispatcherExecutor;
 
@@ -35,11 +34,14 @@ public class ZDispatcher {
     }
 
     public void registerHandler(Socket socket, ZMessageHandler messageHandler, ZSender sender) {
-        registerHandler(socket, messageHandler, sender, Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+        registerHandler(socket, messageHandler, sender,
+                        Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
     }
 
-    public void registerHandler(Socket socket, ZMessageHandler messageHandler, ZSender sender, ExecutorService threadpool) {
-        SocketDispatcher socketDispatcher = new SocketDispatcher(socket, messageHandler, sender, threadpool);
+    public void registerHandler(Socket socket, ZMessageHandler messageHandler, ZSender sender,
+                                ExecutorService threadpool) {
+        SocketDispatcher socketDispatcher = new SocketDispatcher(socket, messageHandler, sender,
+                                                                 threadpool);
         if (dispatchers.putIfAbsent(socket, socketDispatcher) != null) {
             throw new IllegalArgumentException("This socket already have a message handler");
         }
@@ -70,6 +72,7 @@ public class ZDispatcher {
     }
 
     public final static class ZSender {
+
         private final BlockingQueue<ZMsg> out = new LinkedBlockingQueue<ZMsg>();
 
         public final boolean send(ZMsg msg) {
@@ -78,6 +81,7 @@ public class ZDispatcher {
     }
 
     private static final class SocketDispatcher implements Runnable {
+
         private volatile boolean active = false;
         private final CountDownLatch shutdownLatch = new CountDownLatch(1);
         private final Socket socket;
@@ -94,10 +98,11 @@ public class ZDispatcher {
         };
         private final AtomicBoolean busy = new AtomicBoolean(false);
 
-        public SocketDispatcher(Socket socket, ZMessageHandler handler, ZSender sender, ExecutorService handleThreadpool) {
-            this.socket = socket;
-            this.handler = handler;
-            this.sender = sender;
+        public SocketDispatcher(Socket socket, ZMessageHandler handler, ZSender sender,
+                                ExecutorService handleThreadpool) {
+            this.socket     = socket;
+            this.handler    = handler;
+            this.sender     = sender;
             this.threadpool = handleThreadpool;
         }
 
@@ -127,7 +132,9 @@ public class ZDispatcher {
         private void doReceive() {
             ZMsg msg;
             int remainingBuffer = BUFFER_SIZE;
-            while (active && remainingBuffer-- > 0 && (msg = ZMsg.recvMsg(socket, ZMQ.DONTWAIT)) != null && msg.size() > 0 && msg.getFirst().hasData()) {
+            while (active && remainingBuffer-- > 0
+              && (msg = ZMsg.recvMsg(socket, ZMQ.DONTWAIT)) != null && msg.size() > 0 && msg
+              .getFirst().hasData()) {
                 in.add(msg);
             }
         }
@@ -159,6 +166,7 @@ public class ZDispatcher {
         }
 
         private static class ZMessageBuffer {
+
             private final ZMsg[] buffer = new ZMsg[BUFFER_SIZE];
             private int lastValidIndex;
 
@@ -167,7 +175,7 @@ public class ZDispatcher {
                 ZMsg msg;
                 while (++lastIndex < buffer.length && (msg = in.poll()) != null) {
                     buffer[lastIndex] = msg;
-                    lastValidIndex = lastIndex;
+                                        lastValidIndex = lastIndex;
                 }
             }
         }

@@ -92,7 +92,7 @@ public class ZMQQueue implements Runnable, Closeable {
      * Unregisters input and output sockets.
      */
     @Override
-    public void close() throws IOException {
+    public void close() {
         poller.unregister(this.inSocket);
         poller.unregister(this.outSocket);
     }

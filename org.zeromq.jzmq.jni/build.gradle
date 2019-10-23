@@ -54,6 +54,10 @@ jar {
             manifest {
                 attributes('ModuleMainClass': mainClassName)
             }
+        } else {
+            manifest {
+                attributes('Main-Class': mainClassName)
+            }
         }
     }
 

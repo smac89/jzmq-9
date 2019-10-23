@@ -10,7 +10,7 @@ import org.zeromq.devices.ZMQForwarder;
 public class ZMQForwarderTest {
 
     @Test
-    public void testQueue() throws InterruptedException {
+    public void testQueue() {
         Context context = ZMQ.context(1);
 
         ZMQ.Socket clients = context.socket(ZMQ.PAIR);

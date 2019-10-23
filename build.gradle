@@ -100,16 +100,20 @@ subprojects {
     def moduleName = project.name
 
     sourceSets {
-        main {
+        java9 {
             java {
-                if (JavaVersion.current().isJava9Compatible()) {
-                    srcDirs 'src/main/module'
-                }
+                srcDirs 'src/main/java9'
             }
         }
     }
 
     afterEvaluate {
+        dependencies {
+            java9Implementation files(sourceSets.main.output.classesDirs) {
+                builtBy compileJava
+            }
+        }
+
         tasks.withType(JavaCompile) {
             doFirst {
                 options.compilerArgs += [
@@ -118,15 +122,28 @@ subprojects {
             }
         }
 
-        if (JavaVersion.current().isJava9Compatible()) {
-            compileJava {
-                inputs.property('moduleName', moduleName)
-                doFirst {
-                    options.compilerArgs += [
-                            '--module-path', classpath.asPath,
-                    ]
-                    classpath = files()
-                }
+        compileJava {
+            sourceCompatibility = JavaVersion.VERSION_1_7
+            targetCompatibility = JavaVersion.VERSION_1_7
+
+            doFirst {
+                options.compilerArgs += [
+                        '--release', '7'
+                ]
+            }
+        }
+
+        compileJava9Java {
+            inputs.property('moduleName', moduleName)
+            sourceCompatibility = JavaVersion.VERSION_1_9
+            targetCompatibility = JavaVersion.VERSION_1_9
+
+            doFirst {
+                options.compilerArgs += [
+                        '--module-path', (classpath + compileJava.classpath).asPath,
+                        '--release', '9'
+                ]
+                classpath = files()
             }
         }
 
@@ -136,20 +153,14 @@ subprojects {
 
         jar {
             inputs.property('moduleName', moduleName)
-            manifest {
-//                attributes('Multi-Release': 'true')
-                attributes('Automatic-Module-Name': moduleName)
-            }
-        }
 
-        if (JavaVersion.current().isJava9Compatible()) {
-            javadoc {
-                inputs.property('moduleName', moduleName)
-                doFirst {
-                    // See https://github.com/java9-modularity/gradle-modules-plugin/issues/13#issuecomment-432397501
-                    options.addStringOption('-module-path', classpath.asPath)
-                    classpath = files()
-                }
+            into('META-INF/versions/9') {
+                from sourceSets.java9.output
+            }
+
+            manifest {
+                attributes('Multi-Release': 'true')
+                attributes('Automatic-Module-Name': moduleName)
             }
         }
 

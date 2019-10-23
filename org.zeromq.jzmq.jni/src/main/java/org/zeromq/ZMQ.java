@@ -2022,10 +2022,7 @@ public class ZMQ {
             if (socket != null && socket == target.socket)
                 return true;
 
-            if (channel != null && channel == target.channel)
-                return true;
-
-            return false;
+            return channel != null && channel == target.channel;
         }
     }
 

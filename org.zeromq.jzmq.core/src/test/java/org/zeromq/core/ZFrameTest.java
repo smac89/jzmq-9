@@ -1,21 +1,18 @@
 package org.zeromq.core;
 
-import org.junit.Test;
-import org.zeromq.ZMQ;
-import org.zeromq.ZMQ.Socket;
-import org.zeromq.core.ZContext;
-import org.zeromq.core.ZFrame;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+import org.zeromq.ZMQ;
+import org.zeromq.ZMQ.Socket;
+
 /**
  * Tests ZFrame class
  *
  * @author Richard Smith
- *
  */
 public class ZFrameTest {
 

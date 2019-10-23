@@ -6,15 +6,19 @@ import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMQException;
 
 public class ZThread {
+
     public interface IAttachedRunnable {
+
         void run(Object[] args, ZContext ctx, Socket pipe);
     }
 
     public interface IDetachedRunnable {
+
         void run(Object[] args);
     }
 
     private static class ShimThread extends Thread {
+
         private ZContext ctx;
         private IAttachedRunnable attachedRunnable;
         private IDetachedRunnable detachedRunnable;
@@ -26,16 +30,16 @@ public class ZThread {
             assert (pipe != null);
             assert (runnable != null);
 
-            this.ctx = ctx;
+            this.ctx              = ctx;
             this.attachedRunnable = runnable;
-            this.args = args;
-            this.pipe = pipe;
+            this.args             = args;
+            this.pipe             = pipe;
         }
 
         ShimThread(IDetachedRunnable runnable, Object[] args) {
             assert (runnable != null);
             this.detachedRunnable = runnable;
-            this.args = args;
+            this.args             = args;
         }
 
         @Override
@@ -49,8 +53,9 @@ public class ZThread {
                     }
                 }
                 ctx.destroy();
-            } else
+            } else {
                 detachedRunnable.run(args);
+            }
         }
     }
 
@@ -82,8 +87,9 @@ public class ZThread {
         // Connect child pipe to our pipe
         ZContext ccontext = ZContext.shadow(ctx);
         Socket cpipe = ccontext.createSocket(ZMQ.PAIR);
-        if (cpipe == null)
+        if (cpipe == null) {
             return null;
+        }
         cpipe.connect(String.format("inproc://zctx-pipe-%d", pipe.hashCode()));
 
         // Prepare child thread

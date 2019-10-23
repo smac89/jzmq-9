@@ -19,8 +19,6 @@ import org.junit.Test;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Socket;
 
-/**
- */
 public class ZDispatcherTest {
 
     @Test
@@ -67,7 +65,8 @@ public class ZDispatcherTest {
     }
 
     @Test
-    public void testMessagesDispatchedToDifferentHandlersAreExecutedConcurrently() throws InterruptedException, BrokenBarrierException, TimeoutException {
+    public void testMessagesDispatchedToDifferentHandlersAreExecutedConcurrently()
+      throws InterruptedException, BrokenBarrierException, TimeoutException {
         final AtomicBoolean threadingIssueDetected = new AtomicBoolean(false);
         final Lock guardLock1 = new ReentrantLock();
         final Lock guardLock2 = new ReentrantLock();
@@ -139,7 +138,8 @@ public class ZDispatcherTest {
     }
 
     @Test
-    public void testNoMessageAreSentAfterShutdown() throws InterruptedException, BrokenBarrierException, TimeoutException {
+    public void testNoMessageAreSentAfterShutdown()
+      throws InterruptedException, BrokenBarrierException, TimeoutException {
         final AtomicBoolean shutdownIssueDetected = new AtomicBoolean(false);
         final CountDownLatch latch = new CountDownLatch(1);
         ZContext ctx = new ZContext();
@@ -217,7 +217,6 @@ public class ZDispatcherTest {
             }
         }, new ZDispatcher.ZSender());
 
-
 //        long start = System.currentTimeMillis();
         Instant start = Instant.now();
         for (int i = 0; i < nMessages; i++) {
@@ -230,9 +229,13 @@ public class ZDispatcherTest {
         Instant end = Instant.now();
         double elapsedSeconds = Duration.between(start, end).toMillis() / 1_000.0;
         if (elapsedSeconds > 0) {
-            System.out.println(MessageFormat.format("performanceTest throughput:{0} messages/second", nMessages/elapsedSeconds));
+            System.out.println(MessageFormat
+                                 .format("performanceTest throughput:{0} messages/second",
+                                         nMessages / elapsedSeconds));
         } else {
-            System.out.println(MessageFormat.format("performanceTest throughput: Over {0} messages/second", nMessages));
+            System.out.println(MessageFormat
+                                 .format("performanceTest throughput: Over {0} messages/second",
+                                         nMessages));
         }
 
         dispatcher.shutdown();

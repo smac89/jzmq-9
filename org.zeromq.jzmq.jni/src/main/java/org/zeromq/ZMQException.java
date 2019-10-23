@@ -2,13 +2,13 @@ package org.zeromq;
 
 /**
  * ZeroMQ runtime exception.
- * 
+ *
  * @author Alois Belaska &lt;alois.belaska@gmail.com&gt;
  */
 public class ZMQException extends RuntimeException {
     private static final long serialVersionUID = -978820750094924644L;
 
-    private int errorCode = 0;
+    private int errorCode;
 
     public ZMQException(String message, int errorCode) {
         super(message);

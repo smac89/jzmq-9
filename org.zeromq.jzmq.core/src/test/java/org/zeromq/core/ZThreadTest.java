@@ -1,11 +1,9 @@
 package org.zeromq.core;
 
-import org.zeromq.ZMQ;
-import org.zeromq.ZMQ.Socket;
 import org.junit.Assert;
 import org.junit.Test;
-import org.zeromq.core.ZContext;
-import org.zeromq.core.ZThread;
+import org.zeromq.ZMQ;
+import org.zeromq.ZMQ.Socket;
 
 public class ZThreadTest {
 

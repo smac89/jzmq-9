@@ -1,8 +1,10 @@
 package org.zeromq.core;
 
-import org.junit.Test;
-import org.zeromq.ZMQ;
-import org.zeromq.ZMQ.Socket;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -12,16 +14,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import org.junit.Test;
+import org.zeromq.ZMQ;
+import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMQException;
-import org.zeromq.core.ZContext;
-import org.zeromq.core.ZFrame;
-import org.zeromq.core.ZMsg;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class ZMsgTest {
 
@@ -77,8 +73,9 @@ public class ZMsgTest {
         input.connect("inproc://zmsg.test2");
 
         ZMsg msg = new ZMsg();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++) {
             msg.addString("Frame" + i);
+        }
         ZMsg copy = msg.duplicate();
         copy.send(output);
         msg.send(output);
@@ -93,8 +90,9 @@ public class ZMsgTest {
         assertTrue(msg != null);
         assertEquals(10, msg.size());
         int count = 0;
-        for (ZFrame f : msg)
+        for (ZFrame f : msg) {
             assertTrue(f.streq("Frame" + count++));
+        }
         assertEquals(60, msg.contentSize());
         msg.destroy();
 
@@ -104,8 +102,9 @@ public class ZMsgTest {
     @Test
     public void testMessageFrameManipulation() {
         ZMsg msg = new ZMsg();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++) {
             msg.addString("Frame" + i);
+        }
 
         // Remove all frames apart from the first and last one
         for (int i = 0; i < 8; i++) {
@@ -134,7 +133,7 @@ public class ZMsgTest {
         msg.destroy();
 
         msg = new ZMsg();
-        f = new ZFrame("Address");
+        f   = new ZFrame("Address");
         msg.wrap(f);
         assertEquals(2, msg.size());
         msg.addString("Body");
@@ -165,8 +164,9 @@ public class ZMsgTest {
     @Test
     public void testLoadSave() {
         ZMsg msg = new ZMsg();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++) {
             msg.addString("Frame" + i);
+        }
 
         try {
             // Save msg to a file

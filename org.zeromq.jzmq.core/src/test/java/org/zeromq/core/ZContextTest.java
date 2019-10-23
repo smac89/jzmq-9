@@ -1,21 +1,19 @@
 package org.zeromq.core;
 
-import org.junit.Test;
-import org.zeromq.ZMQ;
-import org.zeromq.ZMQ.Socket;
-import org.zeromq.ZMQException;
-import org.zeromq.core.ZContext;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+import org.zeromq.ZMQ;
+import org.zeromq.ZMQ.Socket;
+import org.zeromq.ZMQException;
+
 /**
  * Tests high-level ZContext class
  *
  * @author richardsmith
- *
  */
 public class ZContextTest {
 

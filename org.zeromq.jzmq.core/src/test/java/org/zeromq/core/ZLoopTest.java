@@ -20,14 +20,12 @@ package org.zeromq.core;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.zeromq.ZMQ;
+import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
-import org.zeromq.ZMQ.PollItem;
-import org.junit.Test;
-import org.junit.Before;
-import org.zeromq.core.ZContext;
-import org.zeromq.core.ZLoop;
 
 public class ZLoopTest {
 

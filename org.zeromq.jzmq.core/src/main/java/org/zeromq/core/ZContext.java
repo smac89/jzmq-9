@@ -2,9 +2,7 @@ package org.zeromq.core;
 
 import java.io.Closeable;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Context;
 import org.zeromq.ZMQ.Error;
@@ -14,14 +12,13 @@ import org.zeromq.ZMQException;
 /**
  * ZContext provides a high-level ZeroMQ context management class
  *
- * The ZContext class wraps java org.zeromq.Context objects, which in turn wrap native 0MQ contexts. It manages open
- * sockets in the context and automatically closes these before terminating the context. It provides a simple way to set
- * the linger timeout on sockets, and configure contexts for number of I/O threads. Sets-up signal (interrupt) handling
- * for the process.
- *
- * @see <a href="http://github.com/zeromq/czmq/blob/master/src/zctx.c">czmq version</a>
+ * The ZContext class wraps java org.zeromq.Context objects, which in turn wrap native 0MQ contexts.
+ * It manages open sockets in the context and automatically closes these before terminating the
+ * context. It provides a simple way to set the linger timeout on sockets, and configure contexts
+ * for number of I/O threads. Sets-up signal (interrupt) handling for the process.
  *
  * @author rsmith (at) rsbatechnology (dot) co (dot) uk
+ * @see <a href="http://github.com/zeromq/czmq/blob/master/src/zctx.c">czmq version</a>
  */
 public class ZContext implements Closeable {
 
@@ -54,11 +51,11 @@ public class ZContext implements Closeable {
      * Class Constructor
      */
     public ZContext() {
-        context = null; // Don't create Context until create 1st 0MQ socket
-        sockets = new CopyOnWriteArrayList<>();
+        context   = null; // Don't create Context until create 1st 0MQ socket
+        sockets   = new CopyOnWriteArrayList<>();
         ioThreads = 1;
-        linger = 0;
-        main = true;
+        linger    = 0;
+        main      = true;
     }
 
     /**
@@ -71,21 +68,23 @@ public class ZContext implements Closeable {
         sockets.clear();
 
         // Only terminate context if we are on the main thread
-        if (isMain() && context != null)
+        if (isMain() && context != null) {
             context.term();
+        }
 
     }
 
     /**
-     * Creates a new managed socket within this ZContext instance. Use this to get automatic management of the socket at
-     * shutdown
+     * Creates a new managed socket within this ZContext instance. Use this to get automatic
+     * management of the socket at shutdown
      *
      * @param type socket type (see ZMQ static class members)
      * @return Newly created Socket object
      */
     public Socket createSocket(int type) {
-        if (context == null)
+        if (context == null) {
             context = ZMQ.context(ioThreads);
+        }
 
         // Create and register socket
         Socket socket = context.socket(type);
@@ -99,8 +98,9 @@ public class ZContext implements Closeable {
      * @param s org.zeromq.Socket object to destroy
      */
     public void destroySocket(Socket s) {
-        if (s == null)
+        if (s == null) {
             return;
+        }
 
         if (sockets.contains(s)) {
             if (!s.isClosed()) {
@@ -118,8 +118,8 @@ public class ZContext implements Closeable {
     }
 
     /**
-     * Creates new shadow context. Shares same underlying org.zeromq.Context instance but has own list of managed
-     * sockets, io thread count etc.
+     * Creates new shadow context. Shares same underlying org.zeromq.Context instance but has own
+     * list of managed sockets, io thread count etc.
      *
      * @param ctx Original ZContext to create shadow of
      * @return New ZContext
@@ -181,7 +181,8 @@ public class ZContext implements Closeable {
     }
 
     /**
-     * @param ctx sets the underlying org.zeromq.Context associated with this ZContext wrapper object
+     * @param ctx sets the underlying org.zeromq.Context associated with this ZContext wrapper
+     * object
      */
     public void setContext(Context ctx) {
         this.context = ctx;

@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMQ.Poller;
@@ -14,18 +13,17 @@ import org.zeromq.ZMQException;
 import org.zeromq.core.ZThread.IAttachedRunnable;
 
 /**
- * ZAuth takes over authentication for all incoming connections in its context.
- * Note that libzmq provides four levels of security: default NULL (which zauth
- * does not see), and authenticated NULL, PLAIN, and CURVE, which zauth can see.
+ * ZAuth takes over authentication for all incoming connections in its context. Note that libzmq
+ * provides four levels of security: default NULL (which zauth does not see), and authenticated
+ * NULL, PLAIN, and CURVE, which zauth can see.
  *
- * Based on <a
- * href="http://github.com/zeromq/czmq/blob/master/src/zauth.c">zauth.c</a> in
- * czmq
+ * Based on <a href="http://github.com/zeromq/czmq/blob/master/src/zauth.c">zauth.c</a> in czmq
  *
  * @author cbusbey (at) connamara (dot) com
  */
 public class ZAuth {
-	public static final String CURVE_ALLOW_ANY = "*";
+
+    public static final String CURVE_ALLOW_ANY = "*";
 
     private Socket pipe; //pipe to backend agent
     private boolean verbose;
@@ -56,11 +54,11 @@ public class ZAuth {
                 self.handler = handler;
 
                 //  Get all standard frames off the handler socket
-                self.version = request.popString();
-                self.sequence = request.popString();
-                self.domain = request.popString();
-                self.address = request.popString();
-                self.identity = request.popString();
+                self.version   = request.popString();
+                self.sequence  = request.popString();
+                self.domain    = request.popString();
+                self.address   = request.popString();
+                self.identity  = request.popString();
                 self.mechanism = request.popString();
 
                 //  If the version is wrong, we're linked with a bogus libzmq, so die
@@ -91,8 +89,6 @@ public class ZAuth {
 
         /**
          * Send a zap reply to the handler socket
-         *
-         * @param request
          */
         static void reply(ZAPRequest request, String statusCode, String statusText) {
             if (request == null) {
@@ -111,10 +107,9 @@ public class ZAuth {
     }
 
     /**
-     * ZAuthAgent is the backend agent which we talk to over a pipe. This lets
-     * the agent do work asynchronously in the background while our application
-     * does other things. This is invisible to the caller, who sees a classic
-     * API.
+     * ZAuthAgent is the backend agent which we talk to over a pipe. This lets the agent do work
+     * asynchronously in the background while our application does other things. This is invisible
+     * to the caller, who sees a classic API.
      */
     private static class ZAuthAgent implements IAttachedRunnable {
 
@@ -132,22 +127,19 @@ public class ZAuth {
         private ZCertStore certStore = null;
 
 
-
         private ZAuthAgent(ZAuth auth) {
             this.auth = auth;
         }
 
         /**
          * handle a message from the front end api
-         *
-         * @return
          */
         private boolean controlMessage() {
             ZMsg msg = ZMsg.recvMsg(pipe);
 
             String command = msg.popString();
             if (verbose) {
-            	System.out.printf("ZAuth: API command=%s\n",command);
+                System.out.printf("ZAuth: API command=%s\n", command);
             }
             if (command == null) {
                 return false; //interrupted
@@ -244,7 +236,8 @@ public class ZAuth {
                 } else {
                     denied = true;
                     if (verbose) {
-                        System.out.printf("I: DENIED (not in whitelist) address = %s\n", request.address);
+                        System.out
+                          .printf("I: DENIED (not in whitelist) address = %s\n", request.address);
                     }
                 }
             } else if (!blacklist.isEmpty()) {
@@ -256,7 +249,8 @@ public class ZAuth {
                 } else {
                     allowed = true;
                     if (verbose) {
-                        System.out.printf("I: PASSED (not in blacklist) address = %s\n", request.address);
+                        System.out
+                          .printf("I: PASSED (not in blacklist) address = %s\n", request.address);
                     }
                 }
             }
@@ -274,7 +268,7 @@ public class ZAuth {
                     allowed = authenticatePlain(request);
                 } else if (request.mechanism.equals("CURVE")) {
                     // For CURVE, even a whitelisted address must authenticate
-                	allowed = authenticateCurve(request);
+                    allowed = authenticateCurve(request);
                 } else if (request.mechanism.equals("GSSAPI")) {
                     // At this point, the request is authenticated, send to
                     //zauth callback for complete authorization
@@ -316,29 +310,31 @@ public class ZAuth {
         }
 
         private boolean authenticateCurve(ZAPRequest request) {
-        	if (this.allow_any) {
-        		if (this.verbose) {
-        			System.out.println("zauth: - allowed (CURVE allow any client)");
-        		}
-        		return true;
-        	} else {
-        		if (this.certStore!=null) {
-        			if (this.certStore.containsPublicKey(request.clientKey)) {
-        				// login allowed
-        				if (verbose) {
-        					System.out.printf("zauth: - allowed (CURVE) client_key=%s\n",request.clientKey);
-        				}
-        				return true;
-        			} else {
-        				// login not allowed. couldn't find certificate
-        				if (verbose) {
-        					System.out.printf("zauth: - denied (CURVE) client_key=%s\n",request.clientKey);
-        				}
-        				return false;
-        			}
-        		}
-        	}
-        	return false;
+            if (this.allow_any) {
+                if (this.verbose) {
+                    System.out.println("zauth: - allowed (CURVE allow any client)");
+                }
+                return true;
+            } else {
+                if (this.certStore != null) {
+                    if (this.certStore.containsPublicKey(request.clientKey)) {
+                        // login allowed
+                        if (verbose) {
+                            System.out.printf("zauth: - allowed (CURVE) client_key=%s\n",
+                                              request.clientKey);
+                        }
+                        return true;
+                    } else {
+                        // login not allowed. couldn't find certificate
+                        if (verbose) {
+                            System.out
+                              .printf("zauth: - denied (CURVE) client_key=%s\n", request.clientKey);
+                        }
+                        return false;
+                    }
+                }
+            }
+            return false;
         }
 
         @Override
@@ -356,7 +352,8 @@ public class ZAuth {
 
             pipe.send("OK");
 
-            PollItem[] pollItems = {new PollItem(pipe, Poller.POLLIN), new PollItem(handler, Poller.POLLIN)};
+            PollItem[] pollItems = {new PollItem(pipe, Poller.POLLIN),
+              new PollItem(handler, Poller.POLLIN)};
             while (!terminated && !Thread.currentThread().isInterrupted()) {
                 int rc = ZMQ.poll(pollItems, -1);
                 if (rc == -1) {
@@ -401,7 +398,8 @@ public class ZAuth {
                         continue;
                     }
 
-                    this.passwords.put(line.substring(0, equals), line.substring(equals + 1, line.length()));
+                    this.passwords
+                      .put(line.substring(0, equals), line.substring(equals + 1, line.length()));
                 }
                 br.close();
             } catch (Exception ex) {
@@ -411,9 +409,9 @@ public class ZAuth {
     }
 
     /**
-     * Install authentication for the specified context. Note that until you add
-     * policies, all incoming NULL connections are allowed (classic ZeroMQ
-     * behaviour), and all PLAIN and CURVE connections are denied.
+     * Install authentication for the specified context. Note that until you add policies, all
+     * incoming NULL connections are allowed (classic ZeroMQ behaviour), and all PLAIN and CURVE
+     * connections are denied.
      */
     public ZAuth(ZContext ctx) {
         pipe = ZThread.fork(ctx, new ZAuthAgent(this));
@@ -425,8 +423,6 @@ public class ZAuth {
 
     /**
      * Enable verbose tracing of commands and activity
-     *
-     * @param verbose
      */
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
@@ -440,12 +436,10 @@ public class ZAuth {
     }
 
     /**
-     * Allow (whitelist) a single IP address. For NULL, all clients from this
-     * address will be accepted. For PLAIN and CURVE, they will be allowed to
-     * continue with authentication. You can call this method multiple times to
-     * whitelist multiple IP addresses. If you whitelist a single address, any
-     * non-whitelisted addresses are treated as blacklisted.
-     *
+     * Allow (whitelist) a single IP address. For NULL, all clients from this address will be
+     * accepted. For PLAIN and CURVE, they will be allowed to continue with authentication. You can
+     * call this method multiple times to whitelist multiple IP addresses. If you whitelist a single
+     * address, any non-whitelisted addresses are treated as blacklisted.
      */
     public void allow(String address) {
         assert (address != null);
@@ -458,10 +452,9 @@ public class ZAuth {
     }
 
     /**
-     * Deny (blacklist) a single IP address. For all security mechanisms, this
-     * rejects the connection without any further authentication. Use either a
-     * whitelist, or a blacklist, not not both. If you define both a whitelist
-     * and a blacklist, only the whitelist takes effect.
+     * Deny (blacklist) a single IP address. For all security mechanisms, this rejects the
+     * connection without any further authentication. Use either a whitelist, or a blacklist, not
+     * not both. If you define both a whitelist and a blacklist, only the whitelist takes effect.
      */
     public void deny(String address) {
         assert (address != null);
@@ -474,12 +467,9 @@ public class ZAuth {
     }
 
     /**
-     * Configure PLAIN authentication for a given domain. PLAIN authentication
-     * uses a plain-text password file. To cover all domains, use "*". You can
-     * modify the password file at any time; it is reloaded automatically.
-     *
-     * @param domain
-     * @param filename
+     * Configure PLAIN authentication for a given domain. PLAIN authentication uses a plain-text
+     * password file. To cover all domains, use "*". You can modify the password file at any time;
+     * it is reloaded automatically.
      */
     public void configurePlain(String domain, String filename) {
         assert (domain != null);
@@ -496,7 +486,8 @@ public class ZAuth {
     /**
      * Configure CURVE authentication
      *
-     * @param location Can be ZAuth.CURVE_ALLOW_ANY or a directory with public-keys that will be accepted
+     * @param location Can be ZAuth.CURVE_ALLOW_ANY or a directory with public-keys that will be
+     * accepted
      */
     public void configureCurve(String location) {
         assert (location != null);
@@ -541,7 +532,8 @@ public class ZAuth {
      */
     protected boolean authenticateGSS(ZAPRequest request) {
         if (verbose) {
-            System.out.printf("I: ALLOWED (GSSAPI allow any client) principal = %s identity = %s%n", request.principal, request.identity);
+            System.out.printf("I: ALLOWED (GSSAPI allow any client) principal = %s identity = %s%n",
+                              request.principal, request.identity);
         }
 
         return true;

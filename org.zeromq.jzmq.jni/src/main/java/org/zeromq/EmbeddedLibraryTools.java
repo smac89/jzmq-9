@@ -47,10 +47,8 @@ public class EmbeddedLibraryTools {
 
     }
 
-    private static void catalogArchive(final File jarfile, final Collection<String> files) {
-        JarFile j = null;
-        try {
-            j = new JarFile(jarfile);
+    private static void catalogArchive(final File jarFile, final Collection<String> files) {
+        try (JarFile j = new JarFile(jarFile)) {
             final Enumeration<JarEntry> e = j.entries();
             while (e.hasMoreElements()) {
                 final JarEntry entry = e.nextElement();
@@ -61,11 +59,6 @@ public class EmbeddedLibraryTools {
 
         } catch (IOException x) {
             System.err.println(x.toString());
-        } finally {
-            try {
-                j.close();
-            } catch (Exception e) {
-            }
         }
 
     }
@@ -133,11 +126,11 @@ public class EmbeddedLibraryTools {
                 // native library found within JAR, extract and load
                 try {
 
-                    final File libfile = File.createTempFile(lib, ".lib");
-                    libfile.deleteOnExit(); // just in case
+                    final File libFile = File.createTempFile(lib, ".lib");
+                    libFile.deleteOnExit(); // just in case
 
                     final InputStream in = nativeLibraryUrl.openStream();
-                    final OutputStream out = new BufferedOutputStream(new FileOutputStream(libfile));
+                    final OutputStream out = new BufferedOutputStream(new FileOutputStream(libFile));
 
                     int len = 0;
                     byte[] buffer = new byte[8192];
@@ -145,7 +138,7 @@ public class EmbeddedLibraryTools {
                         out.write(buffer, 0, len);
                     out.close();
                     in.close();
-                    System.load(libfile.getAbsolutePath());
+                    System.load(libFile.getAbsolutePath());
 
                     usingEmbedded = true;
 

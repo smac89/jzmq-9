@@ -60,7 +60,7 @@ public class EmbeddedLibraryToolsTest {
 
     @Test
     @PrepareForTest(EmbeddedLibraryTools.class)
-    public void multiLibLoad() throws Exception {
+    public void multiLibLoad() {
         mockStaticPartial(System.class, "load");
         Capture<String> loadCapture = newCapture(CaptureType.ALL);
         System.load(capture(loadCapture));
@@ -75,7 +75,7 @@ public class EmbeddedLibraryToolsTest {
 
     @Test
     @PrepareForTest(EmbeddedLibraryTools.class)
-    public void libsAsProp() throws Exception {
+    public void libsAsProp() {
         try {
             System.setProperty("jzmq.libs", "foo,libjzmq");
             mockStaticPartial(System.class, "load");

@@ -37,8 +37,8 @@ public class ZMQForwarder implements Runnable {
      */
     @Override
     public void run() {
-        byte[] msg = null;
-        boolean more = true;
+        byte[] msg;
+        boolean more;
 
         while (!Thread.currentThread().isInterrupted()) {
             try {

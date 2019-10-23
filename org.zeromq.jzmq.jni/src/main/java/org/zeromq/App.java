@@ -4,11 +4,11 @@ import java.util.Collection;
 
 /**
  * Simple App to display version information about jzmq.
- * 
+ *
  */
 public class App {
 
-    public static void main(final String[] args) throws Exception {
+    public static void main(final String[] args) {
 
         final Package p = App.class.getPackage();
         final String appname = p.getSpecificationTitle();
